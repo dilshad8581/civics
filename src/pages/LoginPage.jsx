@@ -165,7 +165,7 @@ const LoginPage = () => {
             </div>
 
             {/* Form Card */}
-            <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/50">
+            <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-gray-200/80">
               {/* Badge */}
               <div className="mb-6">
                 <span className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-2 text-sm font-medium text-emerald-700">

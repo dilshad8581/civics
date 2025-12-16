@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
   Camera,
@@ -22,18 +22,27 @@ import {
   ChevronRight,
   BarChart3,
   Star,
+  Loader2,
 } from "lucide-react";
 import logo from "../assets/logo-leaf.png";
 
+// ImageKit configuration
+const IMAGEKIT_PUBLIC_KEY = import.meta.env.VITE_IMAGEKIT_PUBLIC_KEY;
+const IMAGEKIT_URL_ENDPOINT = import.meta.env.VITE_IMAGEKIT_URL_ENDPOINT;
+
 export default function ProfilePage() {
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [username, setUsername] = useState("demouser");
   const [email, setEmail] = useState("demo@cleanstreet.com");
   const [fullname, setFullname] = useState("Demo User");
   const [phone, setPhone] = useState("+1 (555) 123-4567");
   const [location, setLocation] = useState("San Francisco, CA");
   const [bio, setBio] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState("");
@@ -70,6 +79,8 @@ export default function ProfilePage() {
           setFullname(data.name || "Demo User");
           setPhone(data.phone || "+1 (555) 123-4567");
           setLocation(data.location || "San Francisco, CA");
+          setBio(data.bio || "");
+          setImageUrl(data.imageUrl || "");
         }
       } catch (error) {
         console.log("Using default values");
@@ -84,9 +95,90 @@ export default function ProfilePage() {
     return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
   };
 
-  const handleSave = () => {
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 3000);
+  const handleSave = async () => {
+    setIsSaving(true);
+    const token = localStorage.getItem("token");
+    try {
+      const res = await fetch("http://localhost:5000/api/profile", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: fullname,
+          username,
+          phone,
+          location,
+          bio,
+          imageUrl,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 3000);
+      }
+    } catch (error) {
+      console.error("Error saving profile:", error);
+    }
+    setIsSaving(false);
+  };
+
+  // Handle image upload to ImageKit
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      alert("Please select an image file");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Image size should be less than 5MB");
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      // Get authentication parameters from backend
+      const authRes = await fetch("http://localhost:5000/api/upload/auth");
+      const authData = await authRes.json();
+
+      // Create form data for ImageKit upload
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("publicKey", IMAGEKIT_PUBLIC_KEY);
+      formData.append("signature", authData.signature);
+      formData.append("expire", authData.expire);
+      formData.append("token", authData.token);
+      formData.append("fileName", `profile_${Date.now()}_${file.name}`);
+      formData.append("folder", "/profile-images");
+
+      // Upload to ImageKit
+      const uploadRes = await fetch("https://upload.imagekit.io/api/v1/files/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const uploadData = await uploadRes.json();
+
+      if (uploadData.url) {
+        setImageUrl(uploadData.url);
+      } else {
+        alert("Failed to upload image. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      alert("Error uploading image. Please try again.");
+    }
+
+    setIsUploading(false);
   };
 
   const validatePassword = (password) => {
@@ -199,9 +291,9 @@ export default function ProfilePage() {
       </header>
 
       {/* MAIN CONTENT */}
-      <div className="relative max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
+      <div className="relative max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-5">
         {/* Page Header */}
-        <div className="mb-8 animate-fade-in-up">
+        <div className="mb-6 animate-fade-in-up">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-3">
             <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl">
               <Settings className="w-6 h-6 text-white" />
@@ -224,15 +316,40 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* LEFT COLUMN - Profile Card */}
           <div className="space-y-6">
-            <div className="bg-white/80 backdrop-blur rounded-3xl shadow-sm hover:shadow-xl transition-all p-6 border border-white/50 animate-fade-in-up">
+            <div className="bg-white/90 backdrop-blur rounded-3xl shadow-sm hover:shadow-lg transition-all p-6 border border-gray-200/80 animate-fade-in-up">
               <div className="flex flex-col items-center text-center">
                 {/* Avatar */}
                 <div className="relative mb-4">
-                  <div className="w-28 h-28 bg-gradient-to-br from-green-400 via-emerald-500 to-teal-500 text-white rounded-3xl flex items-center justify-center text-4xl font-bold shadow-xl shadow-green-200">
-                    {getInitials(fullname)}
-                  </div>
-                  <button className="absolute -bottom-2 -right-2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors border border-gray-100">
-                    <Camera className="w-5 h-5 text-gray-600" />
+                  {imageUrl ? (
+                    <img
+                      src={imageUrl}
+                      alt="Profile"
+                      className="w-28 h-28 rounded-3xl object-cover shadow-xl shadow-green-200"
+                    />
+                  ) : (
+                    <div className="w-28 h-28 bg-gradient-to-br from-green-400 via-emerald-500 to-teal-500 text-white rounded-3xl flex items-center justify-center text-4xl font-bold shadow-xl shadow-green-200">
+                      {getInitials(fullname)}
+                    </div>
+                  )}
+                  {/* Hidden file input */}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageUpload}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  {/* Upload button */}
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="absolute -bottom-2 -right-2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors border border-gray-100 disabled:opacity-50"
+                  >
+                    {isUploading ? (
+                      <Loader2 className="w-5 h-5 text-gray-600 animate-spin" />
+                    ) : (
+                      <Camera className="w-5 h-5 text-gray-600" />
+                    )}
                   </button>
                   <div className="absolute -top-1 -left-1 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center shadow-md">
                     <Star className="w-4 h-4 text-white" fill="white" />
@@ -286,7 +403,7 @@ export default function ProfilePage() {
           {/* MIDDLE COLUMN */}
           <div className="space-y-6">
             {/* Account Information */}
-            <div className="bg-white/80 backdrop-blur rounded-3xl shadow-sm hover:shadow-xl transition-all p-6 border border-white/50 animate-fade-in-up delay-100">
+            <div className="bg-white/90 backdrop-blur rounded-3xl shadow-sm hover:shadow-lg transition-all p-6 border border-gray-200/80 animate-fade-in-up delay-100">
               <h2 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
                 <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl">
                   <User className="w-5 h-5 text-white" />
@@ -353,16 +470,21 @@ export default function ProfilePage() {
 
                 <button
                   onClick={handleSave}
-                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-green-200 transition-all btn-press mt-4"
+                  disabled={isSaving}
+                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg hover:shadow-green-200 transition-all btn-press mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Save className="w-5 h-5" />
-                  Save Changes
+                  {isSaving ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  ) : (
+                    <Save className="w-5 h-5" />
+                  )}
+                  {isSaving ? "Saving..." : "Save Changes"}
                 </button>
               </div>
             </div>
 
             {/* Privacy Settings */}
-            <div className="bg-white/80 backdrop-blur rounded-3xl shadow-sm hover:shadow-xl transition-all p-6 border border-white/50 animate-fade-in-up delay-200">
+            <div className="bg-white/90 backdrop-blur rounded-3xl shadow-sm hover:shadow-lg transition-all p-6 border border-gray-200/80 animate-fade-in-up delay-200">
               <h2 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
                 <div className="p-2 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl">
                   <Shield className="w-5 h-5 text-white" />
@@ -400,7 +522,7 @@ export default function ProfilePage() {
           {/* RIGHT COLUMN */}
           <div className="space-y-6">
             {/* Recent Activity */}
-            <div className="bg-white/80 backdrop-blur rounded-3xl shadow-sm hover:shadow-xl transition-all p-6 border border-white/50 animate-fade-in-up delay-100">
+            <div className="bg-white/90 backdrop-blur rounded-3xl shadow-sm hover:shadow-lg transition-all p-6 border border-gray-200/80 animate-fade-in-up delay-100">
               <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                 <div className="p-2 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl">
                   <Clock className="w-5 h-5 text-white" />
@@ -431,7 +553,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Security Settings */}
-            <div className="bg-white/80 backdrop-blur rounded-3xl shadow-sm hover:shadow-xl transition-all p-6 border border-white/50 animate-fade-in-up delay-200">
+            <div className="bg-white/90 backdrop-blur rounded-3xl shadow-sm hover:shadow-lg transition-all p-6 border border-gray-200/80 animate-fade-in-up delay-200">
               <h2 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
                 <div className="p-2 bg-gradient-to-br from-red-500 to-rose-600 rounded-xl">
                   <Lock className="w-5 h-5 text-white" />

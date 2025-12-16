@@ -219,7 +219,7 @@ const LandingPage = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Map Card */}
-            <div className="bg-white/80 backdrop-blur rounded-3xl shadow-xl overflow-hidden border border-white/50 card-hover animate-fade-in-left">
+            <div className="bg-white/90 backdrop-blur rounded-3xl shadow-xl overflow-hidden border border-gray-200/80 card-hover animate-fade-in-left">
               <div className="p-6 border-b border-gray-100">
                 <div className="flex items-center gap-3">
                   <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl">
@@ -237,7 +237,7 @@ const LandingPage = () => {
             </div>
 
             {/* Gallery Card */}
-            <div className="bg-white/80 backdrop-blur rounded-3xl shadow-xl overflow-hidden border border-white/50 card-hover animate-fade-in-right">
+            <div className="bg-white/90 backdrop-blur rounded-3xl shadow-xl overflow-hidden border border-gray-200/80 card-hover animate-fade-in-right">
               <div className="p-6 border-b border-gray-100">
                 <div className="flex items-center gap-3">
                   <div className="p-3 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl">
@@ -299,7 +299,7 @@ const LandingPage = () => {
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="bg-white/80 backdrop-blur rounded-3xl p-6 shadow-sm hover:shadow-xl transition-all card-hover border border-white/50 animate-fade-in-up"
+                className="bg-white/90 backdrop-blur rounded-3xl p-6 shadow-sm hover:shadow-xl transition-all card-hover border border-gray-200/80 animate-fade-in-up"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className={`w-14 h-14 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center mb-4 shadow-lg`}>

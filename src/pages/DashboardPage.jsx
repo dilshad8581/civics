@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Profiler } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   FileText,
@@ -260,7 +260,7 @@ export default function DashboardPage() {
             {[
               { to: "/dashboard", label: "Dashboard", icon: BarChart3, active: true },
               { to: "/report-issue", label: "Report Issue", icon: Plus },
-              { to: "/complaints", label: "View Complaints", icon: Eye },
+              { to: "/complaints", label: "View Complaints", icon: Eye }
             ].map((item) => (
               <Link
                 key={item.to}
@@ -274,6 +274,7 @@ export default function DashboardPage() {
                 <item.icon className="w-4 h-4" />
                 <span>{item.label}</span>
               </Link>
+             
             ))}
           </nav>
 
@@ -330,9 +331,9 @@ export default function DashboardPage() {
       </header>
 
       {/* MAIN CONTENT */}
-      <div className="relative p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
+      <div className="relative px-4 md:px-6 py-4 md:py-5 max-w-7xl mx-auto">
         {/* Welcome Section */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 animate-fade-in-up">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 animate-fade-in-up">
           <div className="space-y-2">
             <div className="flex items-center gap-3">
               <h1 className="text-2xl md:text-4xl font-bold text-gray-800">
@@ -368,7 +369,7 @@ export default function DashboardPage() {
           ].map((stat, index) => (
             <div
               key={stat.label}
-              className={`relative overflow-hidden ${stat.bgColor} rounded-3xl p-5 md:p-6 card-hover border border-white/50 animate-fade-in-up ${stat.delay}`}
+              className={`relative overflow-hidden ${stat.bgColor} rounded-3xl p-5 md:p-6 card-hover border border-gray-200/80 shadow-sm animate-fade-in-up ${stat.delay}`}
             >
               {/* Decorative gradient blur */}
               <div className={`absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br ${stat.gradient} rounded-full opacity-20 blur-2xl`}></div>
@@ -395,7 +396,7 @@ export default function DashboardPage() {
           {/* Left Column */}
           <div className="space-y-6">
             {/* Recent Activity */}
-            <div className="bg-white/80 backdrop-blur rounded-3xl shadow-sm hover:shadow-xl transition-all p-6 border border-white/50 animate-fade-in-up delay-200">
+            <div className="bg-white/90 backdrop-blur rounded-3xl shadow-sm hover:shadow-lg transition-all p-6 border border-gray-200/80 animate-fade-in-up delay-200">
               <div className="flex justify-between items-center mb-5">
                 <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
                   <div className="p-2 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl">
@@ -429,7 +430,7 @@ export default function DashboardPage() {
             </div>
 
             {/* My Reports */}
-            <div className="bg-white/80 backdrop-blur rounded-3xl shadow-sm hover:shadow-xl transition-all p-6 border border-white/50 animate-fade-in-up delay-300">
+            <div className="bg-white/90 backdrop-blur rounded-3xl shadow-sm hover:shadow-lg transition-all p-6 border border-gray-200/80 animate-fade-in-up delay-300">
               <div className="flex justify-between items-center mb-5">
                 <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
                   <div className="p-2 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-xl">
@@ -502,7 +503,7 @@ export default function DashboardPage() {
           {/* Middle Column */}
           <div className="space-y-6">
             {/* Quick Actions */}
-            <div className="bg-white/80 backdrop-blur rounded-3xl shadow-sm hover:shadow-xl transition-all p-6 border border-white/50 animate-fade-in-up delay-300">
+            <div className="bg-white/90 backdrop-blur rounded-3xl shadow-sm hover:shadow-lg transition-all p-6 border border-gray-200/80 animate-fade-in-up delay-300">
               <h2 className="text-lg font-bold text-gray-800 mb-5 flex items-center gap-2">
                 <div className="p-2 bg-gradient-to-br from-violet-400 to-purple-500 rounded-xl">
                   <Zap className="w-5 h-5 text-white" />
@@ -593,12 +594,20 @@ export default function DashboardPage() {
             </div>
 
             {/* User Profile Card */}
-            <div className="bg-white/80 backdrop-blur rounded-3xl shadow-sm hover:shadow-xl transition-all p-6 border border-white/50 animate-fade-in-up delay-500">
+            <div className="bg-white/90 backdrop-blur rounded-3xl shadow-sm hover:shadow-lg transition-all p-6 border border-gray-200/80 animate-fade-in-up delay-500">
               <div className="flex flex-col items-center text-center">
                 <div className="relative mb-4">
-                  <div className="w-24 h-24 bg-gradient-to-br from-green-400 via-emerald-500 to-teal-500 text-white rounded-3xl flex items-center justify-center text-3xl font-bold shadow-xl shadow-green-200 transform hover:rotate-3 transition-transform">
-                    {getInitials(displayName)}
-                  </div>
+                  {user?.imageUrl ? (
+                    <img
+                      src={user.imageUrl}
+                      alt="Profile"
+                      className="w-24 h-24 rounded-3xl object-cover shadow-xl shadow-green-200 transform hover:rotate-3 transition-transform"
+                    />
+                  ) : (
+                    <div className="w-24 h-24 bg-gradient-to-br from-green-400 via-emerald-500 to-teal-500 text-white rounded-3xl flex items-center justify-center text-3xl font-bold shadow-xl shadow-green-200 transform hover:rotate-3 transition-transform">
+                      {getInitials(displayName)}
+                    </div>
+                  )}
                   <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full border-4 border-white flex items-center justify-center shadow-lg">
                     <CheckCircle className="w-4 h-4 text-white" />
                   </div>
@@ -638,7 +647,7 @@ export default function DashboardPage() {
           {/* Right Column */}
           <div className="space-y-6">
             {/* Trending Issues */}
-            <div className="bg-white/80 backdrop-blur rounded-3xl shadow-sm hover:shadow-xl transition-all p-6 border border-white/50 animate-fade-in-up delay-400">
+            <div className="bg-white/90 backdrop-blur rounded-3xl shadow-sm hover:shadow-lg transition-all p-6 border border-gray-200/80 animate-fade-in-up delay-400">
               <div className="flex items-center gap-2 mb-5">
                 <div className="p-2 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl">
                   <Flame className="w-5 h-5 text-white" />
@@ -685,7 +694,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Top Contributors */}
-            <div className="bg-white/80 backdrop-blur rounded-3xl shadow-sm hover:shadow-xl transition-all p-6 border border-white/50 animate-fade-in-up delay-500">
+            <div className="bg-white/90 backdrop-blur rounded-3xl shadow-sm hover:shadow-lg transition-all p-6 border border-gray-200/80 animate-fade-in-up delay-500">
               <div className="flex items-center gap-2 mb-5">
                 <div className="p-2 bg-gradient-to-br from-yellow-400 to-amber-500 rounded-xl">
                   <Award className="w-5 h-5 text-white" />

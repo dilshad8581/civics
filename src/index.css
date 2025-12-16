@@ -307,6 +307,16 @@
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
+/* Standard Card Border */
+.card-border {
+  border: 1px solid rgba(229, 231, 235, 0.8);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.card-border:hover {
+  border-color: rgba(209, 213, 219, 1);
+}
+
 /* Scrollbar Styles */
 ::-webkit-scrollbar {
   width: 8px;
