@@ -6,6 +6,7 @@ import LandingPage from "./pages/LandingPage";
 import ProfilePage from "./pages/ProfilePage";
 import DashboardPage from "./pages/DashboardPage";
 import ProtectedRoute from "./components/ProtectedRoute";  
+import ReportCivicIssue from  "./pages/ReportCivicIssue";
 
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
         <Route path="/register" element={<SignupPage />} /> 
         <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+        <Route path="/report-issue" element={<ReportCivicIssue/>}></Route>
       </Routes>
     </Router>
   );
