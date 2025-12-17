@@ -9,8 +9,6 @@ import {
   Shield,
   Lock,
   Clock,
-  Bell,
-  LogOut,
   Save,
   CheckCircle,
   Eye,
@@ -20,15 +18,18 @@ import {
   ThumbsUp,
   Settings,
   ChevronRight,
-  BarChart3,
   Star,
   Loader2,
 } from "lucide-react";
-import logo from "../assets/logo-leaf.png";
 
-// ImageKit configuration
-const IMAGEKIT_PUBLIC_KEY = import.meta.env.VITE_IMAGEKIT_PUBLIC_KEY;
-const IMAGEKIT_URL_ENDPOINT = import.meta.env.VITE_IMAGEKIT_URL_ENDPOINT;
+// Layout Components
+import { Header, PageWrapper } from "../components/layout";
+
+// Common Components
+import { Loader, Card } from "../components/common";
+
+// Constants
+import { IMAGEKIT_PUBLIC_KEY } from "../constants";
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -213,82 +214,13 @@ export default function ProfilePage() {
   const userStats = { reports: 12, resolved: 8, votes: 24, points: 156 };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50/30 to-cyan-50/30 flex items-center justify-center">
-        <div className="text-center">
-          <div className="relative w-20 h-20 mx-auto mb-4">
-            <div className="absolute inset-0 rounded-full border-4 border-emerald-200"></div>
-            <div className="absolute inset-0 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin"></div>
-          </div>
-          <p className="text-gray-600 font-medium animate-pulse">Loading profile...</p>
-        </div>
-      </div>
-    );
+    return <Loader message="Loading profile..." />;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-emerald-50/30 to-cyan-50/30">
-      {/* Decorative Background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-green-200/30 to-emerald-300/20 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 -left-40 w-80 h-80 bg-gradient-to-br from-blue-200/20 to-cyan-300/20 rounded-full blur-3xl"></div>
-      </div>
-
-      {/* HEADER */}
-      <header className="sticky top-0 z-50 w-full glass border-b border-white/20 animate-fade-in-down">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 flex flex-wrap justify-between items-center gap-4">
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="relative">
-              <img src={logo} className="w-10 md:w-11 transition-transform group-hover:scale-110" alt="logo" />
-            </div>
-            <h1 className="text-xl md:text-2xl font-bold gradient-text">CleanStreet</h1>
-          </Link>
-
-          <nav className="hidden md:flex items-center gap-1 bg-white/50 rounded-full p-1 shadow-sm">
-            <Link to="/dashboard" className="flex items-center gap-2 px-4 py-2 rounded-full font-medium text-gray-600 hover:bg-white hover:shadow-sm transition-all">
-              <BarChart3 className="w-4 h-4" />
-              Dashboard
-            </Link>
-            <Link to="/report-issue" className="flex items-center gap-2 px-4 py-2 rounded-full font-medium text-gray-600 hover:bg-white hover:shadow-sm transition-all">
-              <Camera className="w-4 h-4" />
-              Report Issue
-            </Link>
-            <Link to="/complaints" className="flex items-center gap-2 px-4 py-2 rounded-full font-medium text-gray-600 hover:bg-white hover:shadow-sm transition-all">
-              <Eye className="w-4 h-4" />
-              Complaints
-            </Link>
-            <Link to="/profile" className="flex items-center gap-2 px-4 py-2 rounded-full font-medium bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-md shadow-green-200">
-              <User className="w-4 h-4" />
-              Profile
-            </Link>
-          </nav>
-
-          <div className="flex items-center gap-2 md:gap-3">
-            {/* Notification Bell */}
-            <button className="relative p-2.5 rounded-full bg-white/80 hover:bg-white shadow-sm hover:shadow-md transition-all">
-              <Bell className="w-5 h-5 text-gray-600" />
-              <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse ring-2 ring-white"></span>
-            </button>
-
-            {/* Profile Button */}
-            <Link to="/profile" className="flex items-center gap-2 bg-white/80 hover:bg-white rounded-full pl-1 pr-3 py-1 shadow-sm hover:shadow-md transition-all">
-              <div className="w-9 h-9 bg-gradient-to-br from-green-400 to-emerald-600 text-white rounded-full flex items-center justify-center text-sm font-bold shadow-md ring-2 ring-white">
-                {getInitials(fullname)}
-              </div>
-              <span className="hidden sm:block text-sm font-semibold text-gray-700">{fullname}</span>
-            </Link>
-
-            {/* Logout Button */}
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white px-4 py-2.5 rounded-full shadow-md hover:shadow-lg shadow-red-200 transition-all btn-press"
-            >
-              <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline font-medium">Logout</span>
-            </button>
-          </div>
-        </div>
-      </header>
+    <PageWrapper>
+      {/* Header */}
+      <Header activeNav="/profile" />
 
       {/* MAIN CONTENT */}
       <div className="relative max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-5">
@@ -316,7 +248,7 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* LEFT COLUMN - Profile Card */}
           <div className="space-y-6">
-            <div className="bg-white/90 backdrop-blur rounded-3xl shadow-sm hover:shadow-lg transition-all p-6 border border-gray-200/80 animate-fade-in-up">
+            <Card delay="delay-100">
               <div className="flex flex-col items-center text-center">
                 {/* Avatar */}
                 <div className="relative mb-4">
@@ -397,19 +329,16 @@ export default function ProfilePage() {
                   Member since December 2024
                 </p>
               </div>
-            </div>
+            </Card>
           </div>
 
           {/* MIDDLE COLUMN */}
           <div className="space-y-6">
             {/* Account Information */}
-            <div className="bg-white/90 backdrop-blur rounded-3xl shadow-sm hover:shadow-lg transition-all p-6 border border-gray-200/80 animate-fade-in-up delay-100">
-              <h2 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl">
-                  <User className="w-5 h-5 text-white" />
-                </div>
+            <Card delay="delay-200">
+              <Card.Header icon={User} iconGradient="from-blue-500 to-indigo-600">
                 Account Information
-              </h2>
+              </Card.Header>
 
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -481,16 +410,13 @@ export default function ProfilePage() {
                   {isSaving ? "Saving..." : "Save Changes"}
                 </button>
               </div>
-            </div>
+            </Card>
 
             {/* Privacy Settings */}
-            <div className="bg-white/90 backdrop-blur rounded-3xl shadow-sm hover:shadow-lg transition-all p-6 border border-gray-200/80 animate-fade-in-up delay-200">
-              <h2 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-                <div className="p-2 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl">
-                  <Shield className="w-5 h-5 text-white" />
-                </div>
+            <Card delay="delay-300">
+              <Card.Header icon={Shield} iconGradient="from-purple-500 to-violet-600">
                 Privacy Settings
-              </h2>
+              </Card.Header>
 
               <div className="space-y-4">
                 {[
@@ -516,19 +442,16 @@ export default function ProfilePage() {
                   </div>
                 ))}
               </div>
-            </div>
+            </Card>
           </div>
 
           {/* RIGHT COLUMN */}
           <div className="space-y-6">
             {/* Recent Activity */}
-            <div className="bg-white/90 backdrop-blur rounded-3xl shadow-sm hover:shadow-lg transition-all p-6 border border-gray-200/80 animate-fade-in-up delay-100">
-              <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <div className="p-2 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl">
-                  <Clock className="w-5 h-5 text-white" />
-                </div>
+            <Card delay="delay-200">
+              <Card.Header icon={Clock} iconGradient="from-amber-500 to-orange-600">
                 Recent Activity
-              </h2>
+              </Card.Header>
 
               <div className="space-y-3">
                 {[
@@ -550,16 +473,13 @@ export default function ProfilePage() {
                 View Full Activity
                 <ChevronRight className="w-4 h-4" />
               </Link>
-            </div>
+            </Card>
 
             {/* Security Settings */}
-            <div className="bg-white/90 backdrop-blur rounded-3xl shadow-sm hover:shadow-lg transition-all p-6 border border-gray-200/80 animate-fade-in-up delay-200">
-              <h2 className="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2">
-                <div className="p-2 bg-gradient-to-br from-red-500 to-rose-600 rounded-xl">
-                  <Lock className="w-5 h-5 text-white" />
-                </div>
+            <Card delay="delay-300">
+              <Card.Header icon={Lock} iconGradient="from-red-500 to-rose-600">
                 Security Settings
-              </h2>
+              </Card.Header>
 
               <div className="space-y-4">
                 <div>
@@ -637,10 +557,10 @@ export default function ProfilePage() {
                   Password must include uppercase, lowercase, number, symbol & 8+ characters.
                 </p>
               </div>
-            </div>
+            </Card>
           </div>
         </div>
       </div>
-    </div>
+    </PageWrapper>
   );
 }
