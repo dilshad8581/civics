@@ -129,4 +129,28 @@ export const issueService = {
 
     return response.json();
   },
+
+  async updateIssue(id, updateData) {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      throw new Error("Please login to update an issue");
+    }
+
+    const response = await fetch(`${API_BASE_URL}/issues/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(updateData),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to update issue");
+    }
+
+    return response.json();
+  },
 };

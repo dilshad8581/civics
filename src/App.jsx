@@ -5,7 +5,8 @@ import SignupPage from "./pages/SignupPage";
 import LandingPage from "./pages/LandingPage";
 import ProfilePage from "./pages/ProfilePage";
 import DashboardPage from "./pages/DashboardPage";
-import ProtectedRoute from "./components/ProtectedRoute";  
+import ViewComplaintsPage from "./pages/ViewComplaintsPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 import ReportCivicIssue from  "./pages/ReportCivicIssue";
 
 
@@ -23,6 +24,7 @@ function App() {
         <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
         <Route path="/report-issue" element={<ReportCivicIssue/>}></Route>
+        <Route path="/complaints" element={<ViewComplaintsPage />} />
       </Routes>
     </Router>
   );
