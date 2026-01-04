@@ -40,6 +40,20 @@ const SignupPage = () => {
       return;
     }
 
+    // Validate email domain for Volunteer role
+    if (role === "Volunteer" && !email.toLowerCase().endsWith("@v.com")) {
+      setError("Volunteers must register with a volunteer email (@v.com)");
+      showToast("Volunteers must register with a volunteer email (@v.com)", "warning");
+      return;
+    }
+
+    // Validate email domain for Admin role
+    if (role === "Admin" && !email.toLowerCase().endsWith("@a.gmail")) {
+      setError("Admins must register with an admin email (@a.gmail)");
+      showToast("Admins must register with an admin email (@a.gmail)", "warning");
+      return;
+    }
+
     setIsLoading(true);
     setError("");
 
@@ -168,15 +182,34 @@ const SignupPage = () => {
 
             {/* Email */}
             <div>
-              <label className="text-sm font-semibold text-gray-700 mb-1.5 block">Email Address</label>
+              <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
+                Email Address
+                {role === "Volunteer" && (
+                  <span className="ml-2 text-xs font-normal text-amber-600">(@v.com required)</span>
+                )}
+                {role === "Admin" && (
+                  <span className="ml-2 text-xs font-normal text-amber-600">(@a.gmail required)</span>
+                )}
+              </label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="email"
-                  placeholder="your.email@example.com"
+                  placeholder={
+                    role === "Volunteer"
+                      ? "your.name@v.com"
+                      : role === "Admin"
+                        ? "your.name@a.gmail"
+                        : "your.email@example.com"
+                  }
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full h-11 pl-10 pr-3 rounded-xl border border-gray-200 bg-gray-50 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                  className={`w-full h-11 pl-10 pr-3 rounded-xl border bg-gray-50 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all ${
+                    (role === "Volunteer" && email && !email.toLowerCase().endsWith("@v.com")) ||
+                    (role === "Admin" && email && !email.toLowerCase().endsWith("@a.gmail"))
+                      ? "border-amber-400"
+                      : "border-gray-200"
+                  }`}
                   required
                 />
               </div>

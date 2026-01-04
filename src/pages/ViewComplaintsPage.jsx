@@ -92,15 +92,17 @@ export default function ViewComplaintsPage() {
     }
   }, [page]);
 
-  // Handle upvote
-  const handleUpvote = (id) => {
+  // Handle like/dislike update from card
+  const handleComplaintUpdate = (id, updates) => {
     setComplaints((prev) =>
       prev.map((complaint) =>
-        complaint._id === id
-          ? { ...complaint, upvotes: (complaint.upvotes || 0) + 1 }
-          : complaint
+        complaint._id === id ? { ...complaint, ...updates } : complaint
       )
     );
+    // Also update selected complaint if it's the same
+    if (selectedComplaint?._id === id) {
+      setSelectedComplaint((prev) => (prev ? { ...prev, ...updates } : null));
+    }
   };
 
   // Handle card click - open modal
@@ -131,6 +133,13 @@ export default function ViewComplaintsPage() {
       console.error("Error updating complaint:", error);
       throw error;
     }
+  };
+
+  // Handle delete from modal
+  const handleDeleteComplaint = (id) => {
+    // Remove the complaint from the list
+    setComplaints((prev) => prev.filter((complaint) => complaint._id !== id));
+    setTotalCount((prev) => prev - 1);
   };
 
   // Filter options
@@ -242,8 +251,8 @@ export default function ViewComplaintsPage() {
                 <ComplaintCard
                   key={complaint._id}
                   complaint={complaint}
-                  onUpvote={handleUpvote}
                   onClick={handleCardClick}
+                  onUpdate={handleComplaintUpdate}
                 />
               ))}
             </div>
@@ -304,6 +313,7 @@ export default function ViewComplaintsPage() {
         isOpen={isModalOpen}
         onClose={handleModalClose}
         onSave={handleSaveComplaint}
+        onDelete={handleDeleteComplaint}
       />
     </PageWrapper>
   );

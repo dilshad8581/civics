@@ -1,8 +1,10 @@
-import { MapPin, Calendar, ThumbsUp, MessageCircle } from "lucide-react";
+import { useState } from "react";
+import { MapPin, Calendar, ThumbsUp, ThumbsDown, MessageCircle } from "lucide-react";
 import { Avatar, Badge } from "../../common";
 import { ISSUE_EMOJIS } from "../../../constants";
+import { issueService } from "../../../services/issueService";
 
-const ComplaintCard = ({ complaint, onUpvote, onClick }) => {
+const ComplaintCard = ({ complaint, onClick, onUpdate }) => {
   const {
     _id,
     issueTitle,
@@ -12,10 +14,19 @@ const ComplaintCard = ({ complaint, onUpvote, onClick }) => {
     status,
     images,
     createdAt,
-    upvotes = 0,
-    comments = 0,
+    likes = [],
+    dislikes = [],
+    comments = [],
     reportedBy,
   } = complaint;
+
+  const [isLiking, setIsLiking] = useState(false);
+  const [isDisliking, setIsDisliking] = useState(false);
+
+  // Get current user
+  const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const userLiked = likes.some((id) => id === currentUser._id || id._id === currentUser._id);
+  const userDisliked = dislikes.some((id) => id === currentUser._id || id._id === currentUser._id);
 
   const getStatusVariant = (status) => {
     switch (status) {
@@ -53,9 +64,54 @@ const ComplaintCard = ({ complaint, onUpvote, onClick }) => {
 
   const emoji = ISSUE_EMOJIS[issueType] || "📋";
 
-  const handleUpvoteClick = (e) => {
+  const handleLikeClick = async (e) => {
     e.stopPropagation();
-    onUpvote?.(_id);
+    if (!currentUser._id) {
+      alert("Please login to like");
+      return;
+    }
+    if (isLiking) return;
+
+    setIsLiking(true);
+    try {
+      const result = await issueService.likeIssue(_id);
+      // Update the complaint in parent
+      onUpdate?.(_id, {
+        likes: result.userLiked
+          ? [...likes, currentUser._id]
+          : likes.filter((id) => (id._id || id) !== currentUser._id),
+        dislikes: dislikes.filter((id) => (id._id || id) !== currentUser._id),
+      });
+    } catch (error) {
+      console.error("Error liking:", error);
+    } finally {
+      setIsLiking(false);
+    }
+  };
+
+  const handleDislikeClick = async (e) => {
+    e.stopPropagation();
+    if (!currentUser._id) {
+      alert("Please login to dislike");
+      return;
+    }
+    if (isDisliking) return;
+
+    setIsDisliking(true);
+    try {
+      const result = await issueService.dislikeIssue(_id);
+      // Update the complaint in parent
+      onUpdate?.(_id, {
+        dislikes: result.userDisliked
+          ? [...dislikes, currentUser._id]
+          : dislikes.filter((id) => (id._id || id) !== currentUser._id),
+        likes: likes.filter((id) => (id._id || id) !== currentUser._id),
+      });
+    } catch (error) {
+      console.error("Error disliking:", error);
+    } finally {
+      setIsDisliking(false);
+    }
   };
 
   return (
@@ -132,17 +188,39 @@ const ComplaintCard = ({ complaint, onUpvote, onClick }) => {
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            {/* Like Button */}
             <button
-              onClick={handleUpvoteClick}
-              className="flex items-center gap-1 text-gray-400 hover:text-green-500 transition-colors"
+              onClick={handleLikeClick}
+              disabled={isLiking}
+              className={`flex items-center gap-1 px-2 py-1 rounded-lg transition-all ${
+                userLiked
+                  ? "text-green-600 bg-green-50"
+                  : "text-gray-400 hover:text-green-500 hover:bg-green-50"
+              } ${isLiking ? "opacity-50" : ""}`}
             >
-              <ThumbsUp className="w-4 h-4" />
-              <span className="text-xs font-medium">{upvotes}</span>
+              <ThumbsUp className={`w-4 h-4 ${userLiked ? "fill-current" : ""}`} />
+              <span className="text-xs font-medium">{likes.length}</span>
             </button>
-            <div className="flex items-center gap-1 text-gray-400">
+
+            {/* Dislike Button */}
+            <button
+              onClick={handleDislikeClick}
+              disabled={isDisliking}
+              className={`flex items-center gap-1 px-2 py-1 rounded-lg transition-all ${
+                userDisliked
+                  ? "text-red-500 bg-red-50"
+                  : "text-gray-400 hover:text-red-500 hover:bg-red-50"
+              } ${isDisliking ? "opacity-50" : ""}`}
+            >
+              <ThumbsDown className={`w-4 h-4 ${userDisliked ? "fill-current" : ""}`} />
+              <span className="text-xs font-medium">{dislikes.length}</span>
+            </button>
+
+            {/* Comments Count */}
+            <div className="flex items-center gap-1 px-2 py-1 text-gray-400">
               <MessageCircle className="w-4 h-4" />
-              <span className="text-xs font-medium">{comments}</span>
+              <span className="text-xs font-medium">{comments.length}</span>
             </div>
           </div>
         </div>
