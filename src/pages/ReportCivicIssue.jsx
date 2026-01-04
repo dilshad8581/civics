@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 
 // Layout Components
@@ -17,11 +18,43 @@ import {
 import { issueService } from "../services/issueService";
 
 export default function ReportCivicIssue() {
+  const navigate = useNavigate();
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [position, setPosition] = useState(null);
+  const [address, setAddress] = useState("");
+  const [isLoadingAddress, setIsLoadingAddress] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Reverse geocoding - fetch address when position changes
+  useEffect(() => {
+    if (!position) return;
+
+    const fetchAddress = async () => {
+      setIsLoadingAddress(true);
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.lat}&lon=${position.lng}&addressdetails=1`,
+          {
+            headers: {
+              "Accept-Language": "en",
+            },
+          }
+        );
+        const data = await response.json();
+        if (data.display_name) {
+          setAddress(data.display_name);
+        }
+      } catch (error) {
+        console.error("Failed to fetch address:", error);
+      } finally {
+        setIsLoadingAddress(false);
+      }
+    };
+
+    fetchAddress();
+  }, [position]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,7 +67,7 @@ export default function ReportCivicIssue() {
         issueTitle: e.target.issueTitle.value,
         issueType: e.target.issueType.value,
         priorityLevel: e.target.priorityLevel.value,
-        address: e.target.address.value,
+        address: address,
         landmark: e.target.landmark.value,
         description: e.target.description.value,
         location: position ? { lat: position.lat, lng: position.lng } : null,
@@ -42,11 +75,16 @@ export default function ReportCivicIssue() {
 
       await issueService.submitIssue(issueData, selectedFiles);
 
-      setSuccessMessage("Report submitted successfully!");
+      setSuccessMessage("Report submitted successfully! Redirecting to dashboard...");
       e.target.reset();
       setSelectedFiles([]);
       setPosition(null);
-      setTimeout(() => setSuccessMessage(""), 3000);
+      setAddress("");
+
+      // Redirect to dashboard after showing success message
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1500);
     } catch (error) {
       setErrorMessage(error.message || "Failed to submit report. Please try again.");
       setTimeout(() => setErrorMessage(""), 5000);
@@ -92,7 +130,11 @@ export default function ReportCivicIssue() {
           />
 
           {/* Issue Details */}
-          <IssueDetailsForm />
+          <IssueDetailsForm
+            address={address}
+            onAddressChange={setAddress}
+            isLoadingAddress={isLoadingAddress}
+          />
 
           {/* Map */}
           <LocationMap position={position} setPosition={setPosition} />

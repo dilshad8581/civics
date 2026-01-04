@@ -1,7 +1,7 @@
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { ISSUE_TYPES, PRIORITY_LEVELS } from "../../../constants";
 
-const IssueDetailsForm = () => {
+const IssueDetailsForm = ({ address = "", onAddressChange, isLoadingAddress = false }) => {
   return (
     <section className="space-y-5">
       <div className="flex items-center gap-3 mb-4">
@@ -52,12 +52,22 @@ const IssueDetailsForm = () => {
           </select>
         </div>
         <div className="flex flex-col">
-          <label htmlFor="address" className="mb-2 font-semibold text-gray-700 text-sm">Address</label>
+          <label htmlFor="address" className="mb-2 font-semibold text-gray-700 text-sm">
+            Address
+            {isLoadingAddress && (
+              <span className="ml-2 text-xs text-green-600 font-normal inline-flex items-center gap-1">
+                <Loader2 className="w-3 h-3 animate-spin" />
+                Fetching address...
+              </span>
+            )}
+          </label>
           <input
             id="address"
             type="text"
+            value={address}
+            onChange={(e) => onAddressChange?.(e.target.value)}
             className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none transition-all bg-gray-50/50 hover:bg-white"
-            placeholder="Enter Street Address"
+            placeholder="Enter Street Address or select on map"
           />
         </div>
       </div>

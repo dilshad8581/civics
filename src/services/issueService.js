@@ -9,8 +9,11 @@ async function getImageKitAuth() {
   return response.json();
 }
 
-// Upload a single image to ImageKit
-async function uploadToImageKit(file, authParams) {
+// Upload a single image to ImageKit (gets fresh auth for each upload)
+async function uploadToImageKit(file) {
+  // Get fresh auth params for each upload (tokens are single-use)
+  const authParams = await getImageKitAuth();
+
   const formData = new FormData();
   formData.append("file", file);
   formData.append("fileName", file.name);
@@ -32,13 +35,16 @@ async function uploadToImageKit(file, authParams) {
   return result.url;
 }
 
-// Upload multiple images to ImageKit
+// Upload multiple images to ImageKit sequentially
 async function uploadImages(files) {
   if (!files || files.length === 0) return [];
 
-  const authParams = await getImageKitAuth();
-  const uploadPromises = files.map((file) => uploadToImageKit(file, authParams));
-  return Promise.all(uploadPromises);
+  const urls = [];
+  for (const file of files) {
+    const url = await uploadToImageKit(file);
+    urls.push(url);
+  }
+  return urls;
 }
 
 export const issueService = {
